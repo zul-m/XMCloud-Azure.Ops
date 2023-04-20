@@ -1,0 +1,28 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+pool:
+  vmImage: windows-latest
+
+steps:
+- task: UseDotNet@2
+  inputs:
+    packageType: 'sdk'
+    version: '6.0.x'
+    vsVersion: '2019'
+
+- script: |
+    dotnet tool restore
+    dotnet sitecore --help
+  displayName: 'XM CLoud Sitecore help'
+
+- script: |
+    dotnet sitecore cloud login --client-credentials --client-id $(xmc-client-id) --client-secret $(xmc-client-secret) --allow-write
+    echo 'Loggoed in - deploying to xm cloud'
+    dotnet sitecore cloud deployment create --environment-id $(xmcloud-environment-id) --upload --json
+  displayName: 'Login and Deploy'
